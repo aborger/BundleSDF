@@ -82,6 +82,7 @@ def run_one_video(video_dir='/home/bowen/debug/2022-11-18-15-10-24_milk', out_fo
     if i==0:
       mask = reader.get_mask(0)
       mask = cv2.resize(mask, (W,H), interpolation=cv2.INTER_NEAREST)
+      print("color file:", color_file)
       if use_segmenter:
         mask = segmenter.run(color_file.replace('rgb','masks'))
     else:

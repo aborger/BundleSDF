@@ -128,6 +128,8 @@ def run_nerf(p_dict, kf_to_nerf_list, lock, cfg_nerf, translation, sc_factor, st
       time.sleep(0.01)
       continue
 
+    logging.info("New Nerf loop ---------------------------------------")
+
     cnt_nerf += 1
     rgbs_all += list(rgbs)
     depths_all += list(depths)
@@ -339,6 +341,7 @@ class BundleSdf:
 
 
   def make_frame(self, color, depth, K, id_str, mask=None, occ_mask=None, pose_in_model=np.eye(4)):
+    print(f"depth - shape: {depth.shape}, min: {np.min(depth)}, max: {np.max(depth)}, type: {depth.dtype}")
     H,W = color.shape[:2]
     roi = [0,W-1,0,H-1]
     frame = my_cpp.Frame(color,depth,roi,pose_in_model,self.cnt,id_str,K,self.bundler.yml)
@@ -350,7 +353,8 @@ class BundleSdf:
 
 
   def find_corres(self, frame_pairs):
-    logging.info(f"frame_pairs: {len(frame_pairs)}")
+    if self.SPDLOG > 0:
+      logging.info(f"frame_pairs: {len(frame_pairs)}")
     is_match_ref = len(frame_pairs)==1 and frame_pairs[0][0]._ref_frame_id==frame_pairs[0][1]._id and self.bundler._newframe==frame_pairs[0][0]
 
     imgs, tfs, query_pairs = self.bundler._fm.getProcessedImagePairs(frame_pairs)
@@ -373,7 +377,8 @@ class BundleSdf:
     if is_match_ref and len(self.bundler._fm._raw_matches[frame_pairs[0]])<min_match_with_ref:
       self.bundler._fm._raw_matches[frame_pairs[0]] = []
       self.bundler._newframe._status = my_cpp.Frame.FAIL
-      logging.info(f'frame {self.bundler._newframe._id_str} mark FAIL, due to no matching')
+      if self.SPDLOG > 0:
+        logging.info(f'frame {self.bundler._newframe._id_str} mark FAIL, due to no matching')
       return
 
     self.bundler._fm.rawMatchesToCorres(query_pairs)
@@ -389,7 +394,8 @@ class BundleSdf:
 
 
   def process_new_frame(self, frame):
-    logging.info(f"process frame {frame._id_str}")
+    if self.SPDLOG > 0:
+      logging.info(f"process frame {frame._id_str}")
 
     self.bundler._newframe = frame
     os.makedirs(self.debug_dir, exist_ok=True)
@@ -402,8 +408,9 @@ class BundleSdf:
       self.bundler._firstframe = frame
 
     frame.invalidatePixelsByMask(frame._fg_mask)
+
     if frame._id==0 and np.abs(np.array(frame._pose_in_model)-np.eye(4)).max()<=1e-4:
-      frame.setNewInitCoordinate()
+       frame.setNewInitCoordinate()
 
 
     n_fg = (np.array(frame._fg_mask)>0).sum()
@@ -448,10 +455,11 @@ class BundleSdf:
       visibles = np.array(visibles)
       ids = np.argsort(visibles)[::-1]
       found = False
-      pdb.set_trace()
+      #pdb.set_trace()
       for id in ids:
         kf = self.bundler._keyframes[id]
-        logging.info(f"trying new ref frame {kf._id_str}")
+        if self.SPDLOG > 0:
+          logging.info(f"trying new ref frame {kf._id_str}")
         ref_frame = kf
         frame._ref_frame_id = kf._id
         frame._pose_in_model = kf._pose_in_model
@@ -470,10 +478,13 @@ class BundleSdf:
         self.bundler.forgetFrame(frame)
         return
 
-    logging.info(f"frame {frame._id_str} pose update before\n{frame._pose_in_model.round(3)}")
+    if self.SPDLOG > 0:
+      logging.info(f"frame {frame._id_str} pose update before\n{frame._pose_in_model.round(3)}")
     offset = self.bundler._fm.procrustesByCorrespondence(frame, ref_frame)
     frame._pose_in_model = offset@frame._pose_in_model
-    logging.info(f"frame {frame._id_str} pose update after\n{frame._pose_in_model.round(3)}")
+
+    if self.SPDLOG > 0:
+      logging.info(f"frame {frame._id_str} pose update after\n{frame._pose_in_model.round(3)}")
 
     window_size = self.cfg_track["bundle"]["window_size"]
     if len(self.bundler._frames)-len(self.bundler._keyframes)>window_size:

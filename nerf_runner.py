@@ -24,6 +24,7 @@ import pickle
 import matplotlib.pyplot as plt
 from nerf_helpers import *
 from Utils import *
+import open3d as o3d
 
 
 def batchify(fn, chunk):

@@ -8,6 +8,7 @@
 
 
 import os, sys, time,torch,pickle,trimesh,itertools,pdb,zipfile,datetime,imageio,gzip,logging,importlib
+# Avoid incompatible GLIBCXX_3.4.29 not found error from importing SemanticKITTI when importing full open3d
 import open3d as o3d
 from uuid import uuid4
 import cv2

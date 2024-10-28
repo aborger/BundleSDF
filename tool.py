@@ -13,6 +13,7 @@ import shutil,re,imageio,pdb,os,sys
 from Utils import *
 from BundleTrack.scripts.data_reader import *
 import pandas as pd
+import open3d as o3d
 
 
 def find_biggest_cluster(pts, eps=0.06, min_samples=1):
