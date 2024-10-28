@@ -360,10 +360,15 @@ class BundleSdf:
     imgs, tfs, query_pairs = self.bundler._fm.getProcessedImagePairs(frame_pairs)
     imgs = np.array([np.array(img) for img in imgs])
 
+    print("imgs:", imgs.shape)
+
     if len(query_pairs)==0:
       return
 
     corres = self.loftr.predict(rgbAs=imgs[::2], rgbBs=imgs[1::2])
+
+    
+
     for i_pair in range(len(query_pairs)):
       cur_corres = corres[i_pair][:,:4]
       tfA = np.array(tfs[i_pair*2])

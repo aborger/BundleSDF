@@ -30,8 +30,11 @@ class LoftrRunner:
     '''
     @rgbAs: (N,H,W,C)
     '''
+    print("A:", rgbAs.shape, "B:", rgbBs.shape)
     image0 = torch.from_numpy(rgbAs).permute(0,3,1,2).float().cuda()
     image1 = torch.from_numpy(rgbBs).permute(0,3,1,2).float().cuda()
+    print("A:", rgbAs.shape, "B:", rgbBs.shape)
+
     if image0.shape[-1]==3:
       image0 = torchvision.transforms.functional.rgb_to_grayscale(image0)
       image1 = torchvision.transforms.functional.rgb_to_grayscale(image1)
