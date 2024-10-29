@@ -360,9 +360,6 @@ class BundleSdf:
     imgs, tfs, query_pairs = self.bundler._fm.getProcessedImagePairs(frame_pairs)
     imgs = np.array([np.array(img) for img in imgs])
 
-    print("query_pairs:", query_pairs.shape, 
-          "frame pairs:", frame_pairs.shape)
-
     if len(query_pairs)==0:
       return
 
@@ -508,6 +505,7 @@ class BundleSdf:
     local_frames = self.bundler._local_frames
 
     pairs = self.bundler.getFeatureMatchPairs(self.bundler._local_frames)
+    print(f"--------------- Feature match pairs {len(pairs)} ----------------")
     self.find_corres(pairs)
     if frame._status==my_cpp.Frame.FAIL:
       self.bundler.forgetFrame(frame)

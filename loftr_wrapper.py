@@ -73,6 +73,7 @@ class LoftrRunner:
     corres = np.concatenate((mkpts0.reshape(-1,2),mkpts1.reshape(-1,2),mconf.reshape(-1,1)),axis=-1).reshape(-1,5).astype(np.float32)
 
     logging.info(f'corres: {corres.shape}')
+    logging.info(f'pair ids: {pair_ids.shape}')
     corres_tmp = []
     for i in range(len(rgbAs)):
       cur_corres = corres[pair_ids==i]
