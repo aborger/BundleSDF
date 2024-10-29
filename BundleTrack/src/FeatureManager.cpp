@@ -1541,7 +1541,14 @@ void SiftManager::runRansacBetween(std::shared_ptr<Frame> frameA, std::shared_pt
 
 }
 
-
+// mkpt = match key point
+// uA_ is mkpt0_u from LoFTR
+// vA_ is mkpt0_v from LoFTR
+// uB_ is mkpt1_u from LoFTR
+// vB_ is mkpt1_u from LoFTR
+// fA is frameA
+// fB is frameB
+// 
 Correspondence SiftManager::makeCorrespondence(float uA_, float vA_, float uB_, float vB_, const std::shared_ptr<Frame> &fA, const std::shared_ptr<Frame> &fB, const float dist_thres, const float dot_thres, const float confidence)
 {
   if (!Utils::isPixelInsideImage(fA->_H, fA->_W,uA_,vA_) || !Utils::isPixelInsideImage(fB->_H, fB->_W,uB_,vB_))
@@ -1931,9 +1938,13 @@ int SiftManager::countInlierCorres(std::shared_ptr<Frame> frameA, std::shared_pt
 void SiftManager::vizCorresBetween(std::shared_ptr<Frame> frameA, std::shared_ptr<Frame> frameB, const std::string &name)
 {
   if ((*yml)["SPDLOG"].as<int>()<2) return;
+
   const auto &corres = _matches[{frameA,frameB}];
+
   if (corres.size()==0) return;
+
   const std::string out_dir = (*yml)["debug_dir"].as<std::string>()+_bundler->_newframe->_id_str+"/";
+
   if (!boost::filesystem::exists(out_dir))
   {
     system(("mkdir -p "+out_dir).c_str());
@@ -1948,6 +1959,7 @@ void SiftManager::vizCorresBetween(std::shared_ptr<Frame> frameA, std::shared_pt
   std::vector<Correspondence> matches_transformed;
 
   std::ofstream ff(fmt::format("{}/{}_match_{}_{}_uvs.txt",out_dir,frameA->_id_str,frameB->_id_str,name));
+
   for (int i=0;i<corres.size();i++)
   {
     if (!corres[i]._isinlier) continue;

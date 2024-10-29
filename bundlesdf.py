@@ -360,7 +360,8 @@ class BundleSdf:
     imgs, tfs, query_pairs = self.bundler._fm.getProcessedImagePairs(frame_pairs)
     imgs = np.array([np.array(img) for img in imgs])
 
-    print("imgs:", imgs.shape)
+    print("query_pairs:", query_pairs.shape, 
+          "frame pairs:", frame_pairs.shape)
 
     if len(query_pairs)==0:
       return
