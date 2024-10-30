@@ -215,7 +215,7 @@ def get_embedder(multires, cfg, i=0, octree_m=None):
 
 
 
-def preprocess_data(rgbs,depths,masks,normal_maps,poses,sc_factor,translation):
+def preprocess_data(rgbs,depths,masks,poses,sc_factor,translation,normal_maps=None):
     '''
     @rgbs: np array (N,H,W,3)
     @depths: (N,H,W)

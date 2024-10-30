@@ -216,6 +216,10 @@ def run_nerf(p_dict, kf_to_nerf_list, lock, cfg_nerf, translation, sc_factor, st
     else:
       occ_masks = None
 
+    print("Nerf variables:", rgbs.shape, depths.shape, masks.shape,
+          poses.shape)
+  
+
     if cnt_nerf==0:
       logging.info(f"First nerf run, create Runner, latest nerf frame {frame_id}")
       nerf = NerfRunner(cfg_nerf,rgbs,depths=depths,masks=masks,normal_maps=normal_maps,occ_masks=occ_masks,poses=poses,K=K,build_octree_pcd=pcd_normalized)

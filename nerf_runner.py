@@ -26,7 +26,6 @@ from nerf_helpers import *
 from Utils import *
 import open3d as o3d
 
-
 def batchify(fn, chunk):
   """Constructs a version of 'fn' that applies to smaller batches.
   """
@@ -110,7 +109,7 @@ class DataLoader:
 
 
 class NerfRunner:
-  def __init__(self,cfg,images,depths,masks,normal_maps,poses,K,_run=None,occ_masks=None,build_octree_pcd=None):
+  def __init__(self,cfg,images,depths,masks,poses,K,normal_maps=None,_run=None,occ_masks=None,build_octree_pcd=None):
     set_seed(0)
     self.cfg = cfg
     self.cfg['tv_loss_weight'] = eval(str(self.cfg['tv_loss_weight']))
@@ -751,6 +750,7 @@ class NerfRunner:
       pose_array = self.models['pose_array']
       pose_reg = self.cfg['pose_reg_weight']*pose_array.data[1:].norm()
       loss += pose_reg
+
 
     variation_loss = torch.tensor(0)
 
