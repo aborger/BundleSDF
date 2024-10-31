@@ -4,9 +4,13 @@ ENV TZ=US/Pacific
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y libgtk2.0-dev && \
-    apt-get install -y wget bzip2 ca-certificates curl git vim tmux g++ gcc build-essential cmake checkinstall gfortran libjpeg8-dev libtiff5-dev pkg-config yasm libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libxine2-dev libv4l-dev qt5-default libgtk2.0-dev libtbb-dev libatlas-base-dev libfaac-dev libmp3lame-dev libtheora-dev libvorbis-dev libxvidcore-dev libopencore-amrnb-dev libopencore-amrwb-dev x264 v4l-utils libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev libgphoto2-dev libhdf5-dev doxygen libflann-dev libboost-all-dev proj-data libproj-dev libyaml-cpp-dev cmake-curses-gui
+apt-get install -y libgtk2.0-dev && \
+apt-get install -y wget && \
+apt-get install -y bzip2 ca-certificates curl git vim tmux g++ gcc build-essential cmake checkinstall gfortran libjpeg8-dev libtiff5-dev pkg-config yasm libavcodec-dev libavformat-dev libswscale-dev libxine2-dev libv4l-dev libgtk2.0-dev libtbb-dev libatlas-base-dev libfaac-dev libmp3lame-dev libtheora-dev libvorbis-dev libxvidcore-dev libopencore-amrnb-dev libopencore-amrwb-dev x264 v4l-utils libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev libgphoto2-dev libhdf5-dev doxygen libflann-dev libboost-all-dev proj-data libproj-dev libyaml-cpp-dev cmake-curses-gui
 
+
+# RUN apt-get update && apt-get install -y qt5-default libdc1394-22-dev
+RUN apt-get update && apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
 
 RUN cd / && wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz &&\
     tar xvzf ./eigen-3.4.0.tar.gz &&\
@@ -100,3 +104,65 @@ RUN pip install transformations einops scikit-image awscli-plugin-endpoint gputi
 
 RUN apt-get update --fix-missing && \
     apt install -y rsync lbzip2 pigz zip p7zip-full p7zip-rar
+
+
+
+# ROS
+RUN apt-get clean && apt-get update && apt-get install -y locales
+
+
+RUN locale-gen en_US en_US.UTF-8 && \
+    update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 && \
+    LANG=en_US.UTF-8
+
+RUN apt-get update && apt-get install curl -y
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+    
+RUN apt update && apt install -y \
+    python3-flake8-docstrings \
+    python3-pip \
+    python3-pytest-cov \
+    ros-dev-tools
+
+RUN python3 -m pip install -U \
+   flake8-blind-except \
+   flake8-builtins \
+   flake8-class-newline \
+   flake8-comprehensions \
+   flake8-deprecated \
+   flake8-import-order \
+   flake8-quotes \
+   "pytest>=5.3" \
+   pytest-repeat \
+   pytest-rerunfailures
+
+RUN mkdir -p /opt/ros/humble/src
+RUN cd /opt/ros/humble
+
+RUN cd /opt/ros/humble && vcs import --input https://raw.githubusercontent.com/ros2/ros2/humble/ros2.repos src
+
+RUN cd /opt/ros/humble/src && git clone -b humble https://github.com/ros-perception/vision_opencv.git
+RUN cd /opt/ros/humble/src && git clone -b ros2 https://github.com/ros-simulation/gazebo_ros_pkgs.git
+RUN cd /opt/ros/humble/src && git clone -b humble https://github.com/ros-controls/control_msgs.git
+RUN apt upgrade -y
+RUN rosdep init
+RUN rosdep update
+RUN rosdep install --from-paths /opt/ros/humble/src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
+
+RUN cd /opt/ros/humble && colcon build --symlink-install
+
+RUN apt update && apt install -y \
+    build-essential \
+    git \
+    git-lfs \
+    python3-colcon-common-extensions \
+    python3-colcon-mixin \
+    python3-rosdep \
+    python3-vcstool \
+    iputils-ping \
+    nano \
+    vim \
+    gedit \
+    && rm -rf /var/lib/apt/lists/*
