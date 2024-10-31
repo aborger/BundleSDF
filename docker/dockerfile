@@ -166,3 +166,5 @@ RUN apt update && apt install -y \
     vim \
     gedit \
     && rm -rf /var/lib/apt/lists/*
+
+RUN echo "source /opt/ros/humble/install/setup.bash" >> ~/.bashrc
